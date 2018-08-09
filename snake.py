@@ -68,7 +68,7 @@ LEFT = 1
 DOWN = 2
 RIGHT = 3
 
-Direction = UP
+direction = UP
 
 UP_EDGE = 250
 DOWN_EDGE = -250
@@ -81,25 +81,25 @@ LEFT_EDGE = -400
 def up():
     global direction
     direction=UP #change direction to up
-    move_snake() #update the snake drawing <- remember me later
+    #move_snake() #update the snake drawing <- remember me later
     print ("You pressed the up key!")
 
 def left():
     global direction
     direction=LEFT
-    move_snake()
+    #move_snake()
     print ("You pressed the left key!")
 
 def down():
     global direction
     direction=DOWN
-    move_snake()
+    #move_snake()
     print ("You pressed the down key!")
 
 def right():
     global direction
     direction=RIGHT
-    move_snake()
+    #move_snake()
     print ("You pressed the right key!")
 
 turtle.onkeypress(up, UP_ARROW) # Create listener for up key
@@ -117,7 +117,6 @@ def move_snake():
     my_pos = snake.pos()
     x_pos = my_pos[0]
     y_pos = my_pos[1]
-    turtle.ontimer(move_snake,TIME_STEP)
 
     if direction == RIGHT:
         snake.goto(x_pos + SQUARE_SIZE, y_pos)
@@ -132,7 +131,6 @@ def move_snake():
         snake.goto(x_pos, y_pos - SQUARE_SIZE)
         print ("You moved down!")
 
-    move_snake()
     
     new_pos = snake.pos()
     new_x_pos = new_pos[0]
@@ -158,34 +156,99 @@ def move_snake():
     
     #Stamp new element and append new stamp in list
     #Remember: The snake position changed - update my_pos()
-
-    my_pos = snake.pos()
-    pos_list.append(my_pos)
-    new_stamp = snake.stamp()
-    
-    stamp_list.append(new_stamp)
     
     ######## SPECIAL PLACE - Remember it for part 5
     #pop zeroth element in pos_list to get rid of last the last piece of the tail
+    grow = False
+    global food_stamps, food_pos
+    #If snake is on topo  of the food item
+    if snake.pos() in food_pos :
+        food_ind=food_pos.index(snake.pos()) #What does this do ?
+        food.clearstamp(food_stamps[food_ind]) #Remove eaten food stamp
+        print ("You have eaten the food!")
 
-    old_stamp = stamp_list.pop(0)
-    snake.clearstamp(old_stamp)
-    pos_list.pop(0)
+        food_pos.pop(food_ind)   #Remove eaten food position
+        food_stamps.pop(food_ind)#Remove eaten food stamp
+        print ("You have eaten the food!")
+        make_food()
+        grow = True
+    if grow:
+        #do this and that
+        my_pos = snake.pos()
+        pos_list.append(my_pos)
+        new_stamp = snake.stamp()
+        #old_stamp = stamp_list.pop(0)
+        
+        grow = False
+    else:
+        
+        my_pos = snake.pos()
+        pos_list.append(my_pos)
+        new_stamp = snake.stamp()
+        old_stamp = stamp_list.pop(0)
+        snake.clearstamp(old_stamp)
+        pos_list.pop(0)
+        
+    stamp_list.append(new_stamp)
+        
+    
 
-sturtle.register_shape("trash.gif") # Add trash picture
+    if snake.pos() in pos_list[0:-1]:
+        quit()
+
+    turtle.ontimer(move_snake,TIME_STEP)
+
+def make_food():
+    
+    #The screen positions go from -SIZE/2 to +SIZE/2
+    #But we need to make food pieces only appear on game squares
+    #So we cut up the game board into multiples of SQUARE_SIZE.
+
+    min_x=-int(SIZE_X/2/SQUARE_SIZE)+1
+    max_x=int(SIZE_X/2/SQUARE_SIZE)-1
+    min_y=-int(SIZE_Y/2/SQUARE_SIZE)-1
+    max_y=int(SIZE_Y/2/SQUARE_SIZE)+1
+
+    #Pick a position that is a random multiple of SQUARE_SIZE
+    food_x = random.randint(min_x,max_x)*SQUARE_SIZE
+    food_y = random.randint(min_y,max_y)*SQUARE_SIZE
+    
+    food.goto(food_x,food_y)
+    food_pos.append((food_x,food_y))
+    food_stamps.append(food.stamp())
+    
+
+    
+turtle.register_shape("trash.gif") # Add trash picture
                                    # Make sure you have downloaded this shape
                                    #from the Google Drive folder and saved it
                                    #in the same folder as this Python script
-
+    
 food = turtle.clone()
 food.shape ("trash.gif")
 
 # locations of food
 
 food_pos = [(100,100) , (-100,100) , (-100,-100) , (100,-100)]
-food_stamp = []
 
 # Write the code that:
-#1. moves the food turtle
+#1. moves the food turtle to each food position
+#2. stamps the food turtle at that location
+#3. saves the stamp by appending it to the food_stamp list
+# using food_stamp.append()
 
+for this_food_pos in food_pos :
+    
+    food.goto(this_food_pos)
+    foodstamps = food.stamp()
+    food_stamps.append(foodstamps)
+
+    
+    
+move_snake()
+
+
+
+
+        
     
